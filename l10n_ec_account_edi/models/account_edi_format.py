@@ -80,7 +80,8 @@ class AccountEdiFormat(models.Model):
                     if not tax.l10n_ec_xml_fe_code:
                         errors.append(
                             _(
-                                "You must set Tax Code for Electronic Documents into Tax: %s",
+                                "You must set Tax Code for Electronic Documents into "
+                                "Tax: %s",
                                 tax.display_name,
                             )
                         )
@@ -91,7 +92,8 @@ class AccountEdiFormat(models.Model):
             ):
                 errors.append(
                     _(
-                        "You must set Payment Method SRI on Current document or Journal: %s",
+                        "You must set Payment Method SRI on Current document or "
+                        "Journal: %s",
                         journal.display_name,
                     )
                 )
@@ -140,7 +142,8 @@ class AccountEdiFormat(models.Model):
                 if not company.l10n_ec_liquidation_version:
                     errors.append(
                         _(
-                            "You must set XML Version for Purchase Liquidation into company %s",
+                            "You must set XML Version for Purchase Liquidation into "
+                            "company %s",
                             company.display_name,
                         )
                     )
@@ -162,12 +165,20 @@ class AccountEdiFormat(models.Model):
                         )
                     )
             # TODO: agregar logica para demas tipos de documento
-            errors.extend(self._l10n_ec_check_edi_configuration(journal, company))
+            errors.extend(self._l10n_ec_check_edi_configuration(document, company))
         return errors
 
-    def _l10n_ec_check_edi_configuration(self, journal, company):
+    def _l10n_ec_check_edi_configuration(self, document, company):
+        journal = document.journal_id
         errors = []
         contact_address = journal.l10n_ec_emission_address_id
+        if not document.commercial_partner_id.vat:
+            errors.append(
+                _(
+                    "You must set vat identification for Partner: %s",
+                    document.commercial_partner_id.display_name,
+                )
+            )
         if not company.vat:
             errors.append(
                 _(
@@ -203,7 +214,7 @@ class AccountEdiFormat(models.Model):
 
     def _l10n_ec_post_move_edi(self, documents):
         res = {}
-        # tomar la primer company, todos los documentos deben pertenecer a la misma company
+        # tomar la primer company, todos los documentos deben pertenecer a la misma
         company = documents[0].company_id or self.env.company
         client_send = self._l10n_ec_get_edi_ws_client(
             company.l10n_ec_type_environment, "reception"
@@ -252,7 +263,8 @@ class AccountEdiFormat(models.Model):
                                 document: {
                                     "success": False,
                                     "error": _(
-                                        "Can't connect to SRI Webservice, try in few minutes"
+                                        "Can't connect to SRI Webservice, try in few "
+                                        "minutes"
                                     ),
                                     "attachment": attachment,
                                     "blocking_level": "error",
